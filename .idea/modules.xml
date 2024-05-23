@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/autocraft.iml" filepath="$PROJECT_DIR$/.idea/autocraft.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/mastering-kafka-python-next-stack.iml" filepath="$PROJECT_DIR$/.idea/mastering-kafka-python-next-stack.iml" />
     </modules>
   </component>
 </project>
