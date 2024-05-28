@@ -1,7 +1,7 @@
 from abstract_classes import SchemaFactoryProducerInterface, SchemaFactoryInterface, SchemaRegistryInterface
-from avro_factory import AvroFactory
-from json_schema_factory import JSONSchemaFactory
-from protobuf_factory import ProtobufFactory
+from .avro_factory import AvroFactory
+from .json_schema_factory import JSONSchemaFactory
+from .protobuf_factory import ProtobufFactory
 
 
 class SchemaFactoryProducer(SchemaFactoryProducerInterface):
