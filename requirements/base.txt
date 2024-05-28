@@ -4,3 +4,4 @@ faust-streaming==0.11.0
 # Required for Schema Registry
 confluent-kafka==2.4.0
 protobuf==5.27.0
+requests==2.32.2
