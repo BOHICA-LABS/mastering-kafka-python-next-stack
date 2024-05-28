@@ -1,5 +1,5 @@
 from confluent_kafka.schema_registry import SchemaRegistryClient, Schema
-from abstract_classes import SchemaRegistryInterface
+from .abstract_classes import SchemaRegistryInterface
 
 
 class SchemaRegistry(SchemaRegistryInterface):
