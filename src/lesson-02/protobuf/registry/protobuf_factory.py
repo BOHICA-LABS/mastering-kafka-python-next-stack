@@ -6,6 +6,7 @@ from confluent_kafka.schema_registry.protobuf import ProtobufSerializer, Protobu
 from .abstract_classes import SchemaFactoryInterface
 from .schema_registry import SchemaRegistry
 
+
 class ProtobufFactory(SchemaFactoryInterface):
     def __init__(self, schema_registry: SchemaRegistry):
         self.schema_registry = schema_registry
