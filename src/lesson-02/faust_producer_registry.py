@@ -3,15 +3,14 @@ from protobuf.registry.schema_registry import SchemaRegistry
 from protobuf.registry.protobuf_factory import ProtobufFactory
 from protobuf.serializers.protobufcodec import ProtobufCodec
 
-
 schema_registry_url = 'http://localhost:8081'
 subject = 'users'
+schema_version = 1  # Specify the version of the schema you want to use
 
 schema_registry = SchemaRegistry(schema_registry_url)
 protobuf_factory = ProtobufFactory(schema_registry)
 
-
-User = protobuf_factory.create_message_class(subject, 'User')
+User = protobuf_factory.create_message_class(subject, 'User', version=schema_version)
 user_codec = ProtobufCodec(User)
 
 app = faust.App('myapp_producer', broker='kafka://localhost:9092', web_port=6067)
