@@ -10,18 +10,26 @@ class SchemaRegistryInterface(ABC):
     def register_schema(self, subject: str, schema_str: str, schema_type: str):
         pass
 
+    @abstractmethod
+    def get_schema(self, subject: str, version: int = None):
+        pass
+
+    @abstractmethod
+    def get_versions(self, subject: str):
+        pass
+
 
 class SchemaFactoryInterface(ABC):
     @abstractmethod
-    def create_serializer(self, subject: str):
+    def create_serializer(self, subject: str, version: int = None):
         pass
 
     @abstractmethod
-    def create_deserializer(self, subject: str):
+    def create_deserializer(self, subject: str, version: int = None):
         pass
 
     @abstractmethod
-    def create_message_class(self, subject: str, message_name: str = None):
+    def create_message_class(self, subject: str, message_name: str = None, version: int = None):
         pass
 
     @abstractmethod
