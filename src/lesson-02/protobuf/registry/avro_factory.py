@@ -1,6 +1,6 @@
 from confluent_kafka.schema_registry.avro import AvroSerializer, AvroDeserializer
-from abstract_classes import SchemaFactoryInterface, SchemaRegistryInterface
-from schema_registry import SchemaRegistry
+from .abstract_classes import SchemaFactoryInterface, SchemaRegistryInterface
+from .schema_registry import SchemaRegistry
 
 
 class AvroFactory(SchemaFactoryInterface):
