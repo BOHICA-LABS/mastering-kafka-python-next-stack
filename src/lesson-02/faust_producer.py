@@ -1,8 +1,6 @@
 import faust
 from protobuf.protos.user_pb2 import User
 from protobuf.serializers.protobufcodec import ProtobufCodec
-from google.protobuf.message import Message
-from typing import Any
 
 
 user_codec = ProtobufCodec(User)

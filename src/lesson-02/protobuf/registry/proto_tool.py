@@ -14,16 +14,16 @@ def register_protobuf_schema(factory, subject, schema_path):
     factory.register_schema(subject, schema_path)
 
 
-def create_serializer(factory, subject):
-    return factory.create_serializer(subject)
+def create_serializer(factory, subject, version=None):
+    return factory.create_serializer(subject, version)
 
 
-def create_deserializer(factory, subject):
-    return factory.create_deserializer(subject)
+def create_deserializer(factory, subject, version=None):
+    return factory.create_deserializer(subject, version)
 
 
-def create_message_class(factory, subject, message_name):
-    return factory.create_message_class(subject, message_name)
+def create_message_class(factory, subject, message_name, version=None):
+    return factory.create_message_class(subject, message_name, version)
 
 
 def main():
@@ -32,9 +32,9 @@ def main():
     parser.add_argument("--subject", type=str, required=True, help="Schema subject")
     parser.add_argument("--schema_path", type=str, help="Path to schema file for registration")
     parser.add_argument("--message_name", type=str, help="Message name for creating message class")
+    parser.add_argument("--version", type=int, help="Schema version")
     parser.add_argument("--operation", type=str, required=True,
                         choices=["register", "serialize", "deserialize", "create_message"], help="Operation to perform")
-
     args = parser.parse_args()
 
     schema_registry = initialize_schema_registry(args.url)
@@ -47,23 +47,19 @@ def main():
         print(f"Schema registered for subject: {args.subject}")
 
     elif args.operation == "serialize":
-        serializer = create_serializer(protobuf_factory, args.subject)
+        serializer = create_serializer(protobuf_factory, args.subject, args.version)
         print(f"Serializer created for subject: {args.subject}")
 
     elif args.operation == "deserialize":
-        deserializer = create_deserializer(protobuf_factory, args.subject)
+        deserializer = create_deserializer(protobuf_factory, args.subject, args.version)
         print(f"Deserializer created for subject: {args.subject}")
 
     elif args.operation == "create_message":
         if not args.message_name:
             raise ValueError("Message name is required for creating message class")
-        MessageClass = create_message_class(protobuf_factory, args.subject, args.message_name)
+        MessageClass = create_message_class(protobuf_factory, args.subject, args.message_name, args.version)
         print(f"Message class created for message: {args.message_name}")
 
 
 if __name__ == "__main__":
     main()
-
-
-# python proto_tool.py --url "http://localhost:8081" --subject "users" --schema_path "../../../protos/user.proto" --operation register
-

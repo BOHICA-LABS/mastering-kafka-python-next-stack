@@ -1,6 +1,6 @@
 from confluent_kafka.schema_registry.json_schema import JSONSerializer, JSONDeserializer
-from abstract_classes import SchemaFactoryInterface
-from schema_registry import SchemaRegistry
+from .abstract_classes import SchemaFactoryInterface
+from .schema_registry import SchemaRegistry
 
 
 class JSONSchemaFactory(SchemaFactoryInterface):

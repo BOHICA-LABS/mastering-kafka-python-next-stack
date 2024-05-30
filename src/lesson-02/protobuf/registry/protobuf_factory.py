@@ -1,7 +1,10 @@
+import os
+import tempfile
+import importlib.util
 from google.protobuf import descriptor_pool, message_factory
 from confluent_kafka.schema_registry.protobuf import ProtobufSerializer, ProtobufDeserializer
-from abstract_classes import SchemaFactoryInterface
-from schema_registry import SchemaRegistry
+from .abstract_classes import SchemaFactoryInterface
+from .schema_registry import SchemaRegistry
 
 
 class ProtobufFactory(SchemaFactoryInterface):
@@ -10,26 +13,51 @@ class ProtobufFactory(SchemaFactoryInterface):
         self.pool = descriptor_pool.Default()
         self.factories = {}
 
-    def create_serializer(self, subject: str):
-        schema_response = self.schema_registry.get_latest_schema(subject)
+    def create_serializer(self, subject: str, version: int = None):
+        schema_response = self.schema_registry.get_schema(subject, version)
         schema_str = schema_response.schema.schema_str
         return ProtobufSerializer(schema_str, self.schema_registry.client, {'use.deprecated.format': True})
 
-    def create_deserializer(self, subject: str):
-        schema_response = self.schema_registry.get_latest_schema(subject)
+    def create_deserializer(self, subject: str, version: int = None):
+        schema_response = self.schema_registry.get_schema(subject, version)
         schema_str = schema_response.schema.schema_str
         return ProtobufDeserializer(schema_str, self.schema_registry.client)
 
-    def create_message_class(self, subject: str, message_name: str = None):
-        if subject in self.factories:
-            return self.factories[subject].GetPrototype(self.factories[subject].message_types_by_name[message_name])
+    def compile_proto_from_string(self, proto_string):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            proto_filename = os.path.join(temp_dir, "temp.proto")
+            # Write the .proto string to a file
+            with open(proto_filename, 'w') as temp_proto_file:
+                temp_proto_file.write(proto_string)
+            # Determine the path to the protobuf includes
+            proto_include = os.path.dirname(os.path.abspath(temp_proto_file.name))
+            # Compile the .proto file using protoc
+            protoc_command = f"protoc --proto_path={temp_dir} --proto_path={proto_include} --python_out={temp_dir} {proto_filename}"
+            os.system(protoc_command)
+            # Extract the generated Python module
+            py_module_name = "temp_pb2"
+            py_module_path = os.path.join(temp_dir, py_module_name + ".py")
+            # Load the generated module dynamically
+            spec = importlib.util.spec_from_file_location(py_module_name, py_module_path)
+            generated_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(generated_module)
+            return generated_module
 
-        schema_response = self.schema_registry.get_latest_schema(subject)
-        file_descriptor = self.pool.AddSerializedFile(schema_response.schema.schema_obj.SerializeToString())
-        message_descriptor = file_descriptor.message_types_by_name[message_name]
+    def create_message_class(self, subject: str, message_name: str = None, version: int = None):
+        subject_version_key = f"{subject}:{version}"
+        if subject_version_key in self.factories:
+            return self.factories[subject_version_key].GetPrototype(
+                self.factories[subject_version_key].message_types_by_name[message_name])
+        schema_response = self.schema_registry.get_schema(subject, version)
+        schema_str = schema_response.schema.schema_str
+        # Compile the .proto string and get the generated module
+        generated_module = self.compile_proto_from_string(schema_str)
+        # Get the message class from the generated module
+        message_class = getattr(generated_module, message_name)
+        # Create a MessageFactory and store it
         factory = message_factory.MessageFactory(self.pool)
-        self.factories[subject] = factory
-        return factory.GetPrototype(message_descriptor)
+        self.factories[subject_version_key] = factory
+        return message_class
 
     def register_schema(self, subject: str, schema_path: str):
         with open(schema_path, 'r') as file:
